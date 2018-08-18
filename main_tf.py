@@ -10,13 +10,13 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-
+import time
 
 if __name__ == '__main__':
 
     # Choose between 'cityscapes' and 'camvid'
     dataset = 'cityscapes'
-    cityName = 'Paris'
+    cityName = 'Bangkok'
     # Load dict of pretrained weights
     print('Loading pre-trained weights...')
     with open(CONFIG[dataset]['weights_file'], 'rb') as f:
@@ -65,7 +65,7 @@ if __name__ == '__main__':
 
         file = open('../../../datasets/datasets/'+cityName+'Segmentation/pathAndCorr.txt', 'a+')
         documentsNotOfInterest = ['description.json','overview_map.html','overview.json','quality.txt','quality.csv',
-                                  '.~lock.quality.csv#','usedPanoids.txt','cityInfo.txt']
+                                  '.~lock.quality.csv#','usedPanoids.txt','cityInfo.txt', 'paths.txt','._cityInfo.txt', '._description.json']
 
         alreadySegmented = os.listdir('../../../datasets/datasets/'+cityName+'Segmentation/' +cityName)
 
@@ -77,7 +77,7 @@ if __name__ == '__main__':
                     print("investigating ", pathFolder)
                     pathDir = path.join(baseImagePath,pathFolder)
                     seqSetDirs = os.listdir(pathDir)
-
+                    t1 = time.time()
                     for seqSetFolder in seqSetDirs:
 
                         if seqSetFolder not in documentsNotOfInterest:
@@ -96,9 +96,13 @@ if __name__ == '__main__':
                             for date in dates:
 
                                 imageDirs = os.listdir(path.join(sequencePath,date))
+                                constant = 0
+                                if "days.txt" in imageDirs:
+                                    constant = 1
+
                                 prevHistArray = []
 
-                                for i in range(len(imageDirs)):
+                                for i in range(len(imageDirs)-constant):
 
                                     input_image_path = path.join(sequencePath,date) + '/' + str(i) + '.png'
 
@@ -190,6 +194,7 @@ if __name__ == '__main__':
                                         prev_input_path = input_image_path
                                         prevIm = input_image
                                         prevMask = predicted_image
+                    print("Time ", np.round((time.time()-t1)/60), len(seqSetDirs))
 
 
         file.close()
